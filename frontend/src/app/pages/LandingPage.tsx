@@ -1,6 +1,6 @@
-import { HeroSection } from './components/HeroSection';
-import { HowItWorks } from './components/HowItWorks';
-import { Features } from './components/Features';
+import { HeroSection } from '../components/HeroSection';
+import { HowItWorks } from '../components/HowItWorks';
+import { Features } from '../components/Features';
 
 export default function LandingPage() {
   return (

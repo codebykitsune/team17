@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { CalendarHeader, ViewType } from './components/CalendarHeader';
-import { DayView } from './components/DayView';
-import { WeekView } from './components/WeekView';
-import { MonthView } from './components/MonthView';
-import { YearView } from './components/YearView';
-import { AvailabilitySummary } from './components/AvailabilitySummary';
+import { CalendarHeader, ViewType } from '../components/CalendarHeader';
+import { DayView } from '../components/DayView';
+import { WeekView } from '../components/WeekView';
+import { MonthView } from '../components/MonthView';
+import { YearView } from '../components/YearView';
+import { AvailabilitySummary } from '../components/AvailabilitySummary';
 
 export default function Participant() {
   const [currentView, setCurrentView] = useState<ViewType>('week');

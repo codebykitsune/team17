@@ -1,7 +1,7 @@
 // frontend/src/app/App.tsx
 import { Route, Routes } from "react-router-dom";
 import AdminPage from "./pages/admin.tsx";
-import LP from "./pages/lp.tsx";
+import LP from "./pages/LandingPage.tsx";
 
 export default function App() {
   return (
