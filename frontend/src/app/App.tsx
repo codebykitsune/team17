@@ -1,4 +1,4 @@
-// frontend/src/app/App.tsx
+"use client";
 import { Route, Routes } from "react-router-dom";
 import AdminPage from "./pages/admin.tsx";
 import LP from "./pages/LandingPage.tsx";
