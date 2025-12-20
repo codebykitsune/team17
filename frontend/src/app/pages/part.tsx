@@ -3,7 +3,7 @@ import AnswersView from "../components/AnswersView.tsx";
 import { Button } from "../components/ui/button.tsx";
 import { Input } from "../components/ui/input.tsx";
 
-export default function Answer() {
+export default function Part() {
   return (
     <div className="w-full px-4 max-w-screen-lg mx-auto">
       <div className="p-12 max-w-xl m-auto mt-16">
