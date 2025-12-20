@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Card } from './ui/card';
-import { Plus, Minus } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-import { useNavigate } from 'react-router-dom';
+import { Minus, Plus } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabaseClient";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Input } from "./ui/input";
 
 export function HeroSection() {
-  const [eventName, setEventName] = useState('');
-  const [organizerName, setOrganizerName] = useState('');
+  const [eventName, setEventName] = useState("");
+  const [organizerName, setOrganizerName] = useState("");
   const [participants, setParticipants] = useState(2);
   const navigate = useNavigate();
 
@@ -17,50 +17,50 @@ export function HeroSection() {
       alert("名前とイベント名を入力してください");
       return;
     }
-  
+
     try {
       // 1. events テーブルに挿入
       const { data: eventData, error: eventError } = await supabase
-        .from('events')
+        .from("events")
         .insert([
-          { 
-            name: eventName, 
+          {
+            name: eventName,
             amount: participants,
-            hash: Math.random().toString(36).substring(2, 10) 
+            hash: Math.random().toString(36).substring(2, 10)
           }
         ])
         .select()
         .single();
-  
+
       if (eventError) throw eventError;
-  
+
       // 2. users テーブルに挿入し、作成されたデータを取得する
       const { data: userData, error: userError } = await supabase
-        .from('users')
+        .from("users")
         .insert([
           {
             event_id: eventData.id,
             name: organizerName,
-            role: 'organizer'
+            role: "organizer"
           }
         ])
         .select() // ここで挿入後のデータを取得
         .single(); // 1件として取得
-  
+
       if (userError) throw userError;
-  
-      alert('イベントを作成しました！');
-      
+
+      alert("イベントを作成しました！");
+
       // 3. 次のページへ遷移（state に ID を持たせる）
-      navigate(`/admin?hash=${eventData.hash}`, { 
-        state: { 
-          eventId: eventData.id, 
-          userId: userData.id 
-        } 
+      navigate(`/admin?hash=${eventData.hash}`, {
+        state: {
+          eventId: eventData.id,
+          userId: userData.id,
+          eventName: eventData.name
+        }
       });
-  
     } catch (error: any) {
-      console.error('Error creating event:', error);
+      console.error("Error creating event:", error);
       alert(`作成に失敗しました: ${error.message}`);
     }
   };
@@ -82,7 +82,9 @@ export function HeroSection() {
               ミートアンドイート
             </div>
             <h1 className="text-5xl tracking-tight text-gray-900">
-              イベントの幹事、<br />もう悩まない
+              イベントの幹事、
+              <br />
+              もう悩まない
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">
               参加者全員の位置情報から中間地点を自動計算。最適なレストランを提案します。ログイン不要ですぐに使えます。

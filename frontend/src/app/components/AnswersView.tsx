@@ -1,36 +1,79 @@
-export default function AnswersView() {
-  type CellValue = "circle" | "cross" | null;
+type CellValue = "circle" | "cross" | null;
 
-  type Row = {
-    labelLines: string[];
-    cells: CellValue[];
-    highlight?: boolean;
-  };
+type Row = {
+  labelLines: string[];
+  cells: CellValue[];
+  highlight?: boolean;
+};
 
-  const columns = ["", "藤巻", "りん", "田上", "はつ"];
-  const rows: Row[] = [
-    {
-      labelLines: ["12/17（水）", "18:00~19:00"],
-      cells: ["circle", "cross", "cross", "cross"]
-    },
-    {
-      labelLines: ["12/17（水）", "19:00~20:00"],
-      cells: ["cross", "circle", "circle", "cross"]
-    },
-    {
-      labelLines: ["12/18（木）", "23:00~24:00"],
-      cells: ["circle", "circle", "circle", "circle"],
-      highlight: true
-    },
-    {
-      labelLines: ["hogehoge", "hoge"],
-      cells: [null, null, null, null]
-    },
-    {
-      labelLines: ["hogehoge", "hoge"],
-      cells: [null, null, null, null]
-    }
-  ];
+type AnswersViewProps = {
+  organizerId: string | null;
+  organizerName: string | null;
+  organizerDates: string[];
+  participants: {
+    id: string;
+    name: string | null;
+    dates: string[];
+  }[];
+};
+
+const formatDateLabel = (isoString: string) => {
+  const date = new Date(isoString);
+  const dateLabel = date.toLocaleDateString("ja-JP", {
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short"
+  });
+  const timeLabel = date.toLocaleTimeString("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+  return [dateLabel, timeLabel];
+};
+
+export default function AnswersView({
+  organizerId,
+  organizerName,
+  organizerDates,
+  participants
+}: AnswersViewProps) {
+  const organizerLabel = organizerName ?? organizerId ?? "Organizer";
+  const participantLabels = participants.map(
+    (participant) => participant.name ?? participant.id ?? "Participant"
+  );
+  const columns = ["", organizerLabel, ...participantLabels];
+  const uniqueDates = Array.from(new Set(organizerDates)).sort();
+  const participantDateSets = new Map(
+    participants.map((participant) => [participant.id, new Set(participant.dates)])
+  );
+  const rowsWithMeta = uniqueDates.map((date) => {
+    const participantCells = participants.map((participant) =>
+      participantDateSets.get(participant.id)?.has(date) ? "circle" : "cross"
+    );
+    const circleCount =
+      1 + participantCells.reduce((count, cell) => (cell === "circle" ? count + 1 : count), 0);
+    return {
+      date,
+      row: {
+        labelLines: formatDateLabel(date),
+        cells: ["circle", ...participantCells]
+      },
+      circleCount
+    };
+  });
+
+  const bestCandidate =
+    rowsWithMeta
+      .slice()
+      .sort((a, b) => {
+        if (b.circleCount !== a.circleCount) return b.circleCount - a.circleCount;
+        return a.date.localeCompare(b.date);
+      })[0] ?? null;
+
+  const rows: Row[] = rowsWithMeta.map(({ date, row }) => ({
+    ...row,
+    highlight: bestCandidate?.date === date
+  }));
 
   const renderMark = (value: "circle" | "cross" | null) => {
     if (value === "circle") return "○";
@@ -40,7 +83,9 @@ export default function AnswersView() {
 
   return (
     <div className="w-full overflow-x-auto">
-      <div className="py-2 font-semibold text-lg">最適な候補：</div>
+      <div className="py-2 font-semibold text-lg">
+        最適な候補：{bestCandidate ? formatDateLabel(bestCandidate.date).join(" ") : "未定"}
+      </div>
       <table className="min-w-[720px] w-full table-fixed border border-slate-300 text-sm text-slate-900">
         <colgroup>
           <col className="w-[220px]" />

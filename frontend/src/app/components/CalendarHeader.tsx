@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, Calendar, Users } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { Button } from './ui/button';
 
 export type ViewType = 'day' | 'week' | 'month' | 'year';
@@ -11,6 +12,7 @@ interface CalendarHeaderProps {
   onEventNameChange: (name: string) => void;
   currentView: ViewType;
   onViewChange: (view: ViewType) => void;
+  headerAction?: ReactNode;
 }
 
 export function CalendarHeader({
@@ -21,6 +23,7 @@ export function CalendarHeader({
   onEventNameChange,
   currentView,
   onViewChange,
+  headerAction,
 }: CalendarHeaderProps) {
   const formatDateRange = (date: Date, view: ViewType) => {
     if (view === 'day') {
@@ -60,10 +63,7 @@ export function CalendarHeader({
             placeholder="Event name"
           />
         </div>
-        <Button variant="outline" className="gap-2">
-          <Users className="w-4 h-4" />
-          Share
-        </Button>
+        {headerAction}
       </div>
       
       <div className="flex items-center justify-between">
