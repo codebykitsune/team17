@@ -6,6 +6,7 @@ import { DayView } from "../components/DayView";
 import { MonthView } from "../components/MonthView";
 import { WeekView } from "../components/WeekView";
 import { YearView } from "../components/YearView";
+import { formatJstDateKey, getJstHour, toJstISOString } from "../lib/dateUtils";
 import { supabase } from "../lib/supabaseClient";
 
 export default function Participant() {
@@ -98,8 +99,8 @@ export default function Participant() {
 
         const slotKeys = scheduleData.map((s) => {
           const d = new Date(s.date);
-          const dateStr = d.toISOString().split("T")[0];
-          const hour = d.getHours();
+          const dateStr = formatJstDateKey(d);
+          const hour = getJstHour(d);
           return `${dateStr}-${hour}`;
         });
         setOrganizerSlots(new Set(slotKeys));
@@ -144,7 +145,7 @@ export default function Participant() {
 
         return {
           user_id: userData.id,
-          date: date.toISOString()
+          date: toJstISOString(date)
         };
       });
 

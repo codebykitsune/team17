@@ -1,3 +1,5 @@
+import { formatJstDateKey } from '../lib/dateUtils';
+
 interface MonthViewProps {
   currentMonth: Date;
   selectedSlots: Set<string>;
@@ -30,7 +32,7 @@ export function MonthView({ currentMonth, selectedSlots, onDateClick }: MonthVie
   };
 
   const hasAvailability = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatJstDateKey(date);
     for (let hour = 0; hour < 24; hour++) {
       if (selectedSlots.has(`${dateStr}-${hour}`)) {
         return true;
@@ -40,7 +42,7 @@ export function MonthView({ currentMonth, selectedSlots, onDateClick }: MonthVie
   };
 
   const getAvailabilityCount = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatJstDateKey(date);
     let count = 0;
     for (let hour = 0; hour < 24; hour++) {
       if (selectedSlots.has(`${dateStr}-${hour}`)) {

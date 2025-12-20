@@ -1,3 +1,5 @@
+import { formatJstDateKey } from '../lib/dateUtils';
+
 interface YearViewProps {
   currentYear: Date;
   selectedSlots: Set<string>;
@@ -34,7 +36,7 @@ export function YearView({ currentYear, selectedSlots, onMonthClick }: YearViewP
   };
 
   const hasAvailability = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatJstDateKey(date);
     for (let hour = 0; hour < 24; hour++) {
       if (selectedSlots.has(`${dateStr}-${hour}`)) {
         return true;

@@ -18,6 +18,7 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { supabase } from "../lib/supabaseClient";
+import { toJstISOString } from "../lib/dateUtils";
 
 export default function App() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export default function App() {
 
         return {
           user_id: userId,
-          date: date.toISOString()
+          date: toJstISOString(date)
         };
       });
 
