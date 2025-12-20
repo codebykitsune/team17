@@ -1,13 +1,23 @@
+import { CopyIcon } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // useLocation を追加
+import { useLocation, useNavigate } from "react-router-dom"; // useLocation を追加
 import { AvailabilitySummary } from "../components/AvailabilitySummary";
 import { CalendarHeader, ViewType } from "../components/CalendarHeader";
 import { DayView } from "../components/DayView";
 import { MonthView } from "../components/MonthView";
 import { WeekView } from "../components/WeekView";
 import { YearView } from "../components/YearView";
-import { supabase } from "../lib/supabaseClient"; 
-import { Button } from "../components/ui/button"; 
+import { Button } from "../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "../components/ui/dialog";
+import { Input } from "../components/ui/input";
+import { supabase } from "../lib/supabaseClient";
 
 export default function App() {
   const navigate = useNavigate();
@@ -16,17 +26,21 @@ export default function App() {
   // 前のページから送られてきた情報を取得
   const eventId = location.state?.eventId;
   const userId = location.state?.userId;
+  const eventNameFromState = location.state?.eventName;
 
   const [currentView, setCurrentView] = useState<ViewType>("week");
   const [currentDate, setCurrentDate] = useState(() => {
     const today = new Date();
     const day = today.getDay();
-    const diff = today.getDate() - day + (day === 0 ? -6 : 1); 
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(today.setDate(diff));
   });
 
   const [selectedSlots, setSelectedSlots] = useState<Set<string>>(new Set());
-  const [eventName, setEventName] = useState("Team Meeting Schedule");
+  const [eventName, setEventName] = useState(eventNameFromState || "");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleSaveSchedules = async () => {
     if (selectedSlots.size === 0) {
@@ -45,23 +59,22 @@ export default function App() {
         const parts = slotKey.split("-");
         const hour = Number(parts.pop());
         const dateStr = parts.join("-");
-        const date = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:00:00`);
+        const date = new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00`);
 
         return {
           user_id: userId,
-          date: date.toISOString(),
+          date: date.toISOString()
         };
       });
 
-      const { error } = await supabase
-        .from("schedules")
-        .insert(schedulesToInsert);
+      const { error } = await supabase.from("schedules").insert(schedulesToInsert);
 
       if (error) throw error;
 
-      alert("日程を保存しました！");
-      navigate(`/part?eventId=${eventId}`); 
-
+      const baseUrl = window.location.origin;
+      const nextShareUrl = `${baseUrl}/participant?eventId=${eventId}`;
+      setShareUrl(nextShareUrl);
+      setIsShareModalOpen(true);
     } catch (error: any) {
       console.error("Error saving schedules:", error);
       alert(`保存に失敗しました: ${error.message}`);
@@ -72,10 +85,18 @@ export default function App() {
   const handlePreviousView = () => {
     const newDate = new Date(currentDate);
     switch (currentView) {
-      case "day": newDate.setDate(newDate.getDate() - 1); break;
-      case "week": newDate.setDate(newDate.getDate() - 7); break;
-      case "month": newDate.setMonth(newDate.getMonth() - 1); break;
-      case "year": newDate.setFullYear(newDate.getFullYear() - 1); break;
+      case "day":
+        newDate.setDate(newDate.getDate() - 1);
+        break;
+      case "week":
+        newDate.setDate(newDate.getDate() - 7);
+        break;
+      case "month":
+        newDate.setMonth(newDate.getMonth() - 1);
+        break;
+      case "year":
+        newDate.setFullYear(newDate.getFullYear() - 1);
+        break;
     }
     setCurrentDate(newDate);
   };
@@ -83,10 +104,18 @@ export default function App() {
   const handleNextView = () => {
     const newDate = new Date(currentDate);
     switch (currentView) {
-      case "day": newDate.setDate(newDate.getDate() + 1); break;
-      case "week": newDate.setDate(newDate.getDate() + 7); break;
-      case "month": newDate.setMonth(newDate.getMonth() + 1); break;
-      case "year": newDate.setFullYear(newDate.getFullYear() + 1); break;
+      case "day":
+        newDate.setDate(newDate.getDate() + 1);
+        break;
+      case "week":
+        newDate.setDate(newDate.getDate() + 7);
+        break;
+      case "month":
+        newDate.setMonth(newDate.getMonth() + 1);
+        break;
+      case "year":
+        newDate.setFullYear(newDate.getFullYear() + 1);
+        break;
     }
     setCurrentDate(newDate);
   };
@@ -100,6 +129,18 @@ export default function App() {
       else next.add(slotKey);
       return next;
     });
+  };
+
+  const handleCopyShareUrl = async () => {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setIsCopied(true);
+      window.setTimeout(() => setIsCopied(false), 1500);
+    } catch (error) {
+      console.error("Error copying URL:", error);
+      alert("URLのコピーに失敗しました");
+    }
   };
 
   const handleDateClick = (date: Date) => {
@@ -145,22 +186,61 @@ export default function App() {
         onEventNameChange={setEventName}
         currentView={currentView}
         onViewChange={handleViewChange}
+        headerAction={
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-gray-500">候補日を選択して保存してください</p>
+            <Button onClick={handleSaveSchedules} className="bg-orange-600 hover:bg-orange-700 text-white">
+              日程を確定して保存
+            </Button>
+          </div>
+        }
       />
-
-      <div className="bg-white border-b px-6 py-3 flex justify-end items-center gap-4">
-        <p className="text-sm text-gray-500">候補日を選択して保存してください</p>
-        <Button 
-          onClick={handleSaveSchedules}
-          className="bg-orange-600 hover:bg-orange-700 text-white"
-        >
-          日程を確定して保存
-        </Button>
-      </div>
 
       <div className="flex flex-1 overflow-hidden">
         {renderCalendarView()}
         <AvailabilitySummary selectedSlots={selectedSlots} />
       </div>
+
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent
+          onInteractOutside={(event) => event.preventDefault()}
+          onEscapeKeyDown={(event) => event.preventDefault()}
+          className="[&>button]:hidden"
+        >
+          <DialogHeader>
+            <DialogTitle>共有用URL</DialogTitle>
+            <DialogDescription>参加者にこのURLを共有してください。</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <div className="relative">
+              <Input readOnly value={shareUrl} className="pr-12 font-mono text-sm" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2"
+                onClick={handleCopyShareUrl}
+                aria-label="URLをコピー"
+              >
+                <CopyIcon className="size-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {isCopied ? "コピーしました。" : "OKを押すと集計画面へ移動します。"}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setIsShareModalOpen(false);
+                navigate("/result?eventId=" + eventId);
+              }}
+            >
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
