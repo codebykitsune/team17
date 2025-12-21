@@ -66,12 +66,12 @@ export function DayView({ currentDate, selectedSlots, onSlotToggle, organizerSlo
                   className={`border-r border-b border-gray-200 h-16 transition-colors select-none ${
                     !isOrganizerSelected 
                       ? 'bg-gray-100 cursor-not-allowed' 
-                      : isSelected ? 'bg-blue-100 hover:bg-blue-200 cursor-pointer' : 'hover:bg-gray-50 cursor-pointer'
+                      : isSelected ? 'bg-orange-100 hover:bg-orange-200 cursor-pointer' : 'hover:bg-gray-50 cursor-pointer'
                   }`}
                   onMouseDown={() => handleMouseDown(slotKey)}
                   onMouseEnter={() => handleMouseEnter(slotKey)}
                 >
-                  {isOrganizerSelected && isSelected && <div className="w-full h-full bg-blue-500/20 border-l-4 border-blue-600"></div>}
+                  {isOrganizerSelected && isSelected && <div className="w-full h-full bg-orange-500/20 border-l-4 border-orange-600"></div>}
                 </div>
               </React.Fragment>
             );

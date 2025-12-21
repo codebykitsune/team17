@@ -54,7 +54,7 @@ export function CalendarHeader({
     <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
-          <Calendar className="w-6 h-6 text-blue-600" />
+          <Calendar className="w-6 h-6 text-orange-600" />
           <input
             type="text"
             value={eventName}

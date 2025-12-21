@@ -82,7 +82,7 @@ export function AvailabilitySummary({ selectedSlots }: AvailabilitySummaryProps)
   return (
     <div className="bg-white border-l border-gray-200 p-6 w-80 overflow-auto">
       <div className="flex items-center gap-2 mb-4">
-        <Clock className="w-5 h-5 text-blue-600" />
+        <Clock className="w-5 h-5 text-orange-600" />
         <h3 className="text-gray-900">Your Availability</h3>
       </div>
       

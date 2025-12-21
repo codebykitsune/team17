@@ -259,7 +259,7 @@ export default function Participant() {
             <p className="text-sm text-gray-500">幹事の候補日からあなたの都合を選んでください</p>
             <button
               onClick={handleOpenNameModal}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors shadow-sm"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-md font-medium transition-colors shadow-sm"
             >
               回答を保存して次へ
             </button>
@@ -292,7 +292,7 @@ export default function Participant() {
                 value={participantName}
                 onChange={(e) => setParticipantName(e.target.value)}
                 placeholder="例: 山田 太郎"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 mb-6"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 mb-6"
               />
               <LocationSearch onSelect={setLocation} placeholder="例：渋谷駅、新宿駅..." />
               <div className="flex justify-end gap-3">
@@ -306,7 +306,7 @@ export default function Participant() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-70"
                   disabled={isSaving}
                 >
                   {isSaving ? "保存中..." : "保存する"}

@@ -92,7 +92,7 @@ export function MonthView({ currentMonth, selectedSlots, onDateClick }: MonthVie
                   <div
                     className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-sm mb-2 ${
                       isToday
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-orange-600 text-white'
                         : 'text-gray-900'
                     }`}
                   >
@@ -101,7 +101,7 @@ export function MonthView({ currentMonth, selectedSlots, onDateClick }: MonthVie
                   
                   {hasSlots && (
                     <div className="flex-1 flex flex-col gap-1">
-                      <div className="bg-blue-100 border-l-4 border-blue-600 px-2 py-1 text-xs text-blue-900 rounded-sm">
+                      <div className="bg-orange-100 border-l-4 border-orange-600 px-2 py-1 text-xs text-orange-900 rounded-sm">
                         {slotCount} slot{slotCount !== 1 ? 's' : ''}
                       </div>
                     </div>

@@ -71,12 +71,12 @@ export function YearView({ currentYear, selectedSlots, onMonthClick }: YearViewP
               <div
                 key={monthIndex}
                 onClick={() => onMonthClick(monthIndex)}
-                className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-300 hover:shadow-md transition-all"
+                className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-orange-300 hover:shadow-md transition-all"
               >
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-gray-900">{getMonthName(monthIndex)}</h3>
                   {availabilityCount > 0 && (
-                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+                    <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full">
                       {availabilityCount} day{availabilityCount !== 1 ? 's' : ''}
                     </span>
                   )}
@@ -105,9 +105,9 @@ export function YearView({ currentYear, selectedSlots, onMonthClick }: YearViewP
                         key={idx}
                         className={`aspect-square flex items-center justify-center text-xs rounded ${
                           isToday
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-orange-600 text-white'
                             : hasSlots
-                            ? 'bg-blue-100 text-blue-900'
+                            ? 'bg-orange-100 text-orange-900'
                             : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >

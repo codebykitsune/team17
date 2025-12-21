@@ -66,7 +66,7 @@ export function WeekView({ currentWeek, selectedSlots, onSlotToggle, organizerSl
               return (
                 <div key={index} className="text-center py-3 border-r border-gray-200 last:border-r-0">
                   <div className="text-gray-500 text-sm mb-1">{getDayName(day)}</div>
-                  <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${isToday ? 'bg-blue-600 text-white' : 'text-gray-900'}`}>
+                  <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${isToday ? 'bg-orange-600 text-white' : 'text-gray-900'}`}>
                     {getDayDate(day)}
                   </div>
                 </div>
@@ -94,14 +94,14 @@ export function WeekView({ currentWeek, selectedSlots, onSlotToggle, organizerSl
                       !isOrganizerSelected 
                         ? 'bg-gray-100 cursor-not-allowed' // 参加者画面用のグレーアウト
                         : isSelected
-                          ? 'bg-blue-100 hover:bg-blue-200 cursor-pointer' 
+                          ? 'bg-orange-100 hover:bg-orange-200 cursor-pointer' 
                           : 'hover:bg-gray-50 cursor-pointer'
                     }`}
                     onMouseDown={() => handleMouseDown(slotKey)}
                     onMouseEnter={() => handleMouseEnter(slotKey)}
                   >
                     {isOrganizerSelected && isSelected && (
-                      <div className="w-full h-full bg-blue-500/20 border-l-4 border-blue-600"></div>
+                      <div className="w-full h-full bg-orange-500/20 border-l-4 border-orange-600"></div>
                     )}
                   </div>
                 );
