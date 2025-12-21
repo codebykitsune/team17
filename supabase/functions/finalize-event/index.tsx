@@ -120,7 +120,15 @@ async function searchRestaurants(location: LatLng, apiKey: string): Promise<any[
 
     const data = await response.json();
     if (data.results && data.results.shop && data.results.shop.length > 0) {
-        return data.results.shop;
+        return data.results.shop.map((shop: any) => ({
+            name: shop.name,
+            address: shop.address,
+            genre: { name: shop.genre?.name },
+            urls: { pc: shop.urls?.pc },
+            photo: { pc: { l: shop.photo?.pc?.l } },
+            budget: { name: shop.budget?.name, average: shop.budget?.average },
+            catch: shop.catch
+        }));
     }
     return [];
 }
