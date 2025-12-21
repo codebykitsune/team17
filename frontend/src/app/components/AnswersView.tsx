@@ -37,9 +37,9 @@ export default function AnswersView({
   organizerDates,
   participants
 }: AnswersViewProps) {
-  const organizerLabel = organizerName ?? organizerId ?? "Organizer";
+  const organizerLabel = organizerName ?? organizerId ?? "幹事";
   const participantLabels = participants.map(
-    (participant) => participant.name ?? participant.id ?? "Participant"
+    (participant) => participant.name ?? participant.id ?? "参加者"
   );
   const columns = ["", organizerLabel, ...participantLabels];
   const uniqueDates = Array.from(new Set(organizerDates)).sort();
@@ -56,7 +56,7 @@ export default function AnswersView({
       date,
       row: {
         labelLines: formatDateLabel(date),
-        cells: ["circle", ...participantCells]
+        cells: ["circle", ...participantCells] as CellValue[]
       },
       circleCount
     };
