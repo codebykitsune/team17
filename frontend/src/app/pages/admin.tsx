@@ -1,5 +1,5 @@
 import { CopyIcon } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; // useLocation を追加
 import { AvailabilitySummary } from "../components/AvailabilitySummary";
 import { CalendarHeader, ViewType } from "../components/CalendarHeader";
@@ -18,7 +18,7 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { supabase } from "../lib/supabaseClient";
-import { toJstISOString } from "../lib/dateUtils";
+import { formatJstDateKey, toJstISOString } from "../lib/dateUtils";
 
 export default function App() {
   const navigate = useNavigate();
@@ -42,6 +42,33 @@ export default function App() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [isCopied, setIsCopied] = useState(false);
+
+  const organizerSlots = useMemo(() => {
+    const slots = new Set<string>();
+    const nowJst = new Date(toJstISOString(new Date()));
+
+    const addDaySlots = (date: Date) => {
+      const dateStr = formatJstDateKey(date);
+      for (let hour = 0; hour < 24; hour++) {
+        const slotDate = new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00+09:00`);
+        if (slotDate.getTime() >= nowJst.getTime()) {
+          slots.add(`${dateStr}-${hour}`);
+        }
+      }
+    };
+
+    if (currentView === "day") {
+      addDaySlots(currentDate);
+    } else if (currentView === "week") {
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(currentDate);
+        date.setDate(date.getDate() + i);
+        addDaySlots(date);
+      }
+    }
+
+    return slots;
+  }, [currentView, currentDate]);
 
   const handleSaveSchedules = async () => {
     if (selectedSlots.size === 0) {
@@ -160,9 +187,23 @@ export default function App() {
   const renderCalendarView = () => {
     switch (currentView) {
       case "day":
-        return <DayView currentDate={currentDate} selectedSlots={selectedSlots} onSlotToggle={handleSlotToggle} />;
+        return (
+          <DayView
+            currentDate={currentDate}
+            selectedSlots={selectedSlots}
+            onSlotToggle={handleSlotToggle}
+            organizerSlots={organizerSlots}
+          />
+        );
       case "week":
-        return <WeekView currentWeek={currentDate} selectedSlots={selectedSlots} onSlotToggle={handleSlotToggle} />;
+        return (
+          <WeekView
+            currentWeek={currentDate}
+            selectedSlots={selectedSlots}
+            onSlotToggle={handleSlotToggle}
+            organizerSlots={organizerSlots}
+          />
+        );
       case "month":
         return (
           <MonthView
