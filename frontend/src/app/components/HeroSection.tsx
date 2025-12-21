@@ -3,15 +3,18 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { Plus, Minus } from 'lucide-react';
+import { LocationSearch, LocationData } from './LocationSearch';
 
 export function HeroSection() {
   const [eventName, setEventName] = useState('');
   const [organizerName, setOrganizerName] = useState('');
   const [participants, setParticipants] = useState(2);
+  const [location, setLocation] = useState<LocationData | null>(null);
 
   const handleCreateEvent = () => {
     if (eventName.trim() && organizerName.trim()) {
-      alert(`イベント「${eventName}」を作成しました！\n幹事：${organizerName}さん\n参加人数：${participants}人`);
+      const locationMsg = location ? `\n場所：${location.name}` : '';
+      alert(`イベント「${eventName}」を作成しました！\n幹事：${organizerName}さん\n参加人数：${participants}人${locationMsg}`);
     }
   };
 
@@ -53,7 +56,7 @@ export function HeroSection() {
           {/* Right Column - Interactive Form */}
           <Card className="p-8 shadow-xl border-0 bg-white">
             <h2 className="text-2xl mb-6 text-gray-900">イベントを作成</h2>
-            
+
             <div className="space-y-6">
               {/* Organizer Name Input */}
               <div>
@@ -66,6 +69,17 @@ export function HeroSection() {
                   value={organizerName}
                   onChange={(e) => setOrganizerName(e.target.value)}
                   className="w-full h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+
+              {/* Location Search Input */}
+              <div>
+                <label className="block text-sm mb-2 text-gray-700">
+                  あなたの出発地点（最寄り駅）
+                </label>
+                <LocationSearch
+                  onSelect={setLocation}
+                  placeholder="例：渋谷駅、新宿駅..."
                 />
               </div>
 
