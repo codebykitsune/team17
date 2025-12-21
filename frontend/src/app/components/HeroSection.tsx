@@ -5,11 +5,13 @@ import { supabase } from "../lib/supabaseClient";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
+import { LocationSearch, LocationData } from './LocationSearch';
 
 export function HeroSection() {
   const [eventName, setEventName] = useState("");
   const [organizerName, setOrganizerName] = useState("");
   const [participants, setParticipants] = useState(2);
+  const [location, setLocation] = useState<LocationData | null>(null);
   const navigate = useNavigate();
 
   const handleCreateEvent = async () => {
@@ -41,7 +43,10 @@ export function HeroSection() {
           {
             event_id: eventData.id,
             name: organizerName,
-            role: "organizer"
+            role: "organizer",
+            lat: location?.lat || null,
+            lng: location?.lng || null,
+            nearest_station: location?.name || null
           }
         ])
         .select() // ここで挿入後のデータを取得
@@ -93,6 +98,7 @@ export function HeroSection() {
 
           <Card className="p-8 shadow-xl border-0 bg-white">
             <h2 className="text-2xl mb-6 text-gray-900">イベントを作成</h2>
+
             <div className="space-y-6">
               <div>
                 <label className="block text-sm mb-2 text-gray-700">あなたの名前</label>
@@ -102,6 +108,17 @@ export function HeroSection() {
                   value={organizerName}
                   onChange={(e) => setOrganizerName(e.target.value)}
                   className="w-full h-12"
+                />
+              </div>
+
+              {/* Location Search Input */}
+              <div>
+                <label className="block text-sm mb-2 text-gray-700">
+                  あなたの出発地点（最寄り駅）
+                </label>
+                <LocationSearch
+                  onSelect={setLocation}
+                  placeholder="例：渋谷駅、新宿駅..."
                 />
               </div>
 

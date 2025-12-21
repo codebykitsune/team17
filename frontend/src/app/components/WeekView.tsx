@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatJstDateKey } from '../lib/dateUtils';
 
 interface WeekViewProps {
   currentWeek: Date;
@@ -27,7 +28,7 @@ export function WeekView({ currentWeek, selectedSlots, onSlotToggle, organizerSl
   const getDayName = (date: Date) => date.toLocaleDateString('en-US', { weekday: 'short' });
   const getDayDate = (date: Date) => date.getDate();
   const getSlotKey = (date: Date, hour: number) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatJstDateKey(date);
     return `${dateStr}-${hour}`;
   };
 

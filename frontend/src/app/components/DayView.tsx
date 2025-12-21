@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatJstDateKey } from '../lib/dateUtils';
 
 interface DayViewProps {
   currentDate: Date;
@@ -19,7 +20,7 @@ export function DayView({ currentDate, selectedSlots, onSlotToggle, organizerSlo
   };
 
   const getSlotKey = (hour: number) => {
-    const dateStr = currentDate.toISOString().split('T')[0];
+    const dateStr = formatJstDateKey(currentDate);
     return `${dateStr}-${hour}`;
   };
 
