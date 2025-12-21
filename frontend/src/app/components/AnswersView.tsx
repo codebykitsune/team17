@@ -107,7 +107,7 @@ export default function AnswersView({
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} className={row.highlight ? "bg-sky-200" : "bg-white"}>
+            <tr key={rowIndex} className={row.highlight ? "bg-orange-200" : "bg-white"}>
               <th className="border border-slate-300 px-3 py-4 text-left font-normal">
                 <div className="leading-tight">
                   {row.labelLines.map((line) => (
