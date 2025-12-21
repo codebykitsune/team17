@@ -142,7 +142,7 @@ export default function Result() {
     }
   };
 
-  if (!eventData) return <div className="p-10 text-center">Loading...</div>;
+  if (!eventData) return <div className="p-10 text-center">読み込み中...</div>;
 
   if (eventData.confirmed_date) {
     return (
@@ -150,7 +150,7 @@ export default function Result() {
         <FinalResultView
           confirmedDate={eventData.confirmed_date}
           restaurantInfo={eventData.restaurant_info}
-          nearestStation={eventData.target_station || "Unknown Station"}
+          nearestStation={eventData.target_station || "不明な駅"}
         />
       </div>
     );
@@ -160,8 +160,8 @@ export default function Result() {
     return (
       <div className="flex flex-col items-center justify-center mt-20 p-10">
         <div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full mb-4"></div>
-        <p className="text-xl font-semibold text-gray-700">Finalizing event...</p>
-        <p className="text-gray-500">Calculating the best schedule and restaurant for everyone!</p>
+        <p className="text-xl font-semibold text-gray-700">イベントを確定中...</p>
+        <p className="text-gray-500">最適なスケジュールとお店を計算しています！</p>
       </div>
     );
   }
