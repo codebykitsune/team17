@@ -1,6 +1,7 @@
-
-  # 【技育CAMP】ハッカソン Vol.16
-  #  チーム17
+# Meet And Eat
+ - 技育CAMP2025 ハッカソン Vol.16
+ - チーム名：ノリノリノリノリ
+  
   
   ## Running the code
 
