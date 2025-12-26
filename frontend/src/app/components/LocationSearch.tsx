@@ -72,13 +72,18 @@ export function LocationSearch({ onSelect, placeholder = "駅名を検索...", d
         }
     };
 
-    const fetchNearestStation = async (lat: number, lon: number): Promise<string | null> => {
+    const fetchNearestStation = async (lat: number, lon: number): Promise<{ name: string, lat: number, lng: number } | null> => {
         try {
             const res = await fetch(`https://express.heartrails.com/api/json?method=getStations&x=${lon}&y=${lat}`);
             const data = await res.json();
             // HeartRails returns response.station as an array. The first one is nearest.
             if (data?.response?.station?.[0]) {
-                return data.response.station[0].name;
+                const station = data.response.station[0];
+                return {
+                    name: station.name,
+                    lat: parseFloat(station.y), // y is latitude
+                    lng: parseFloat(station.x)  // x is longitude
+                };
             }
         } catch (error) {
             console.error("HeartRails API failed", error);
@@ -90,14 +95,20 @@ export function LocationSearch({ onSelect, placeholder = "駅名を検索...", d
         setIsLoading(true);
         try {
             // 1. Try HeartRails first (Best for Japanese stations)
-            let name = await fetchNearestStation(lat, lon);
+            const stationData = await fetchNearestStation(lat, lon);
+            let name = "";
+            let targetLat = lat;
+            let targetLng = lon;
 
-            if (name) {
+            if (stationData) {
+                name = stationData.name;
                 // HeartRails returns just the name e.g. "新宿". Append "駅" if likely a station.
-                // Usually HeartRails is just the name. 
                 if (!name.endsWith('駅')) {
                     name = `${name}駅`;
                 }
+                // Use station coordinates instead of browser GPS
+                targetLat = stationData.lat;
+                targetLng = stationData.lng;
             } else {
                 // 2. Fallback to Nominatim if no station found
                 const params = new URLSearchParams({
@@ -119,8 +130,8 @@ export function LocationSearch({ onSelect, placeholder = "駅名を検索...", d
                 setDetectedAddress(name); // Set specific GPS address for display
                 onSelect({
                     name: name,
-                    lat: lat,
-                    lng: lon
+                    lat: targetLat,
+                    lng: targetLng
                 });
             } else {
                 alert("場所を特定できませんでした");
@@ -231,6 +242,9 @@ export function LocationSearch({ onSelect, placeholder = "駅名を検索...", d
                                 <MapPin className="w-4 h-4 shrink-0" />
                                 <span className="font-medium text-sm break-all">{detectedAddress}</span>
                             </div>
+                            <p className="mt-2 text-xs text-green-600/80">
+                                ※意図しない場所の場合は、検索タブから駅や施設名を指定してください
+                            </p>
                         </div>
                     )}
                 </TabsContent>
