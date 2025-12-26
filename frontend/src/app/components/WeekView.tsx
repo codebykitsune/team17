@@ -20,9 +20,7 @@ export function WeekView({ currentWeek, selectedSlots, onSlotToggle, organizerSl
   });
 
   const formatTime = (hour: number) => {
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-    return `${displayHour} ${period}`;
+    return `${hour}:00`;
   };
 
   const getDayName = (date: Date) => date.toLocaleDateString('en-US', { weekday: 'short' });
@@ -34,8 +32,8 @@ export function WeekView({ currentWeek, selectedSlots, onSlotToggle, organizerSl
 
   const handleMouseDown = (slotKey: string) => {
     // 幹事設定データが存在し、かつその中にスロットがない場合のみガードする
-    if (organizerSlots && !organizerSlots.has(slotKey)) return; 
-    
+    if (organizerSlots && !organizerSlots.has(slotKey)) return;
+
     setIsDragging(true);
     const isCurrentlySelected = selectedSlots.has(slotKey);
     setDragMode(isCurrentlySelected ? 'deselect' : 'select');
@@ -46,7 +44,7 @@ export function WeekView({ currentWeek, selectedSlots, onSlotToggle, organizerSl
     if (isDragging) {
       // 幹事設定データが存在し、かつその中にスロットがない場合のみガードする
       if (organizerSlots && !organizerSlots.has(slotKey)) return;
-      
+
       const isCurrentlySelected = selectedSlots.has(slotKey);
       if (dragMode === 'select' && !isCurrentlySelected) onSlotToggle(slotKey);
       else if (dragMode === 'deselect' && isCurrentlySelected) onSlotToggle(slotKey);
@@ -86,17 +84,16 @@ export function WeekView({ currentWeek, selectedSlots, onSlotToggle, organizerSl
                 const isSelected = selectedSlots.has(slotKey);
                 // 幹事設定データがない場合は常に true (選択可能) とみなす
                 const isOrganizerSelected = organizerSlots ? organizerSlots.has(slotKey) : true;
-                
+
                 return (
                   <div
                     key={slotKey}
-                    className={`border-r border-b border-gray-200 last:border-r-0 h-12 transition-colors select-none ${
-                      !isOrganizerSelected 
+                    className={`border-r border-b border-gray-200 last:border-r-0 h-12 transition-colors select-none ${!isOrganizerSelected
                         ? 'bg-gray-100 cursor-not-allowed' // 参加者画面用のグレーアウト
                         : isSelected
-                          ? 'bg-orange-100 hover:bg-orange-200 cursor-pointer' 
+                          ? 'bg-orange-100 hover:bg-orange-200 cursor-pointer'
                           : 'hover:bg-gray-50 cursor-pointer'
-                    }`}
+                      }`}
                     onMouseDown={() => handleMouseDown(slotKey)}
                     onMouseEnter={() => handleMouseEnter(slotKey)}
                   >

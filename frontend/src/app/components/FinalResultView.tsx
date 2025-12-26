@@ -23,6 +23,7 @@ export const FinalResultView = ({ confirmedDate, restaurantInfo, nearestStation 
     const timeStr = dateObj.toLocaleTimeString("ja-JP", {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
     });
 
 
