@@ -45,6 +45,7 @@ async function searchNearbyStations(center: LatLng, apiKey: string): Promise<{ n
         includedTypes: ['train_station', 'subway_station', 'light_rail_station'],
         maxResultCount: 5,
         rankPreference: 'POPULARITY',
+        languageCode: 'ja',
         locationRestriction: {
             circle: {
                 center: { latitude: center.lat, longitude: center.lng },
