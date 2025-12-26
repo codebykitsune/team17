@@ -26,7 +26,8 @@ const formatDateLabel = (isoString: string) => {
   });
   const timeLabel = date.toLocaleTimeString("ja-JP", {
     hour: "2-digit",
-    minute: "2-digit"
+    minute: "2-digit",
+    hour12: false
   });
   return [dateLabel, timeLabel];
 };

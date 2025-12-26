@@ -14,9 +14,7 @@ export function DayView({ currentDate, selectedSlots, onSlotToggle, organizerSlo
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   const formatTime = (hour: number) => {
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-    return `${displayHour} ${period}`;
+    return `${hour}:00`;
   };
 
   const getSlotKey = (hour: number) => {
@@ -63,11 +61,10 @@ export function DayView({ currentDate, selectedSlots, onSlotToggle, organizerSlo
               <React.Fragment key={`hour-${hour}`}>
                 <div className="border-r border-b border-gray-200 px-4 py-3 text-sm text-gray-500 text-right">{formatTime(hour)}</div>
                 <div
-                  className={`border-r border-b border-gray-200 h-16 transition-colors select-none ${
-                    !isOrganizerSelected 
-                      ? 'bg-gray-100 cursor-not-allowed' 
+                  className={`border-r border-b border-gray-200 h-16 transition-colors select-none ${!isOrganizerSelected
+                      ? 'bg-gray-100 cursor-not-allowed'
                       : isSelected ? 'bg-orange-100 hover:bg-orange-200 cursor-pointer' : 'hover:bg-gray-50 cursor-pointer'
-                  }`}
+                    }`}
                   onMouseDown={() => handleMouseDown(slotKey)}
                   onMouseEnter={() => handleMouseEnter(slotKey)}
                 >
