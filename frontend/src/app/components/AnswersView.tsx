@@ -18,7 +18,9 @@ type AnswersViewProps = {
 };
 
 const formatDateLabel = (isoString: string) => {
-  const date = new Date(isoString);
+  // Ensure the string is treated as UTC if it doesn't have timezone info
+  const dateStr = isoString.endsWith("Z") || isoString.includes("+") ? isoString : `${isoString}Z`;
+  const date = new Date(dateStr);
   const dateLabel = date.toLocaleDateString("ja-JP", {
     month: "2-digit",
     day: "2-digit",

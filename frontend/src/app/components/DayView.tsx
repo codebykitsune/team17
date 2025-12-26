@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { formatJstDateKey } from '../lib/dateUtils';
+import { formatDateKey } from '../lib/dateUtils';
 
 interface DayViewProps {
   currentDate: Date;
@@ -18,7 +18,7 @@ export function DayView({ currentDate, selectedSlots, onSlotToggle, organizerSlo
   };
 
   const getSlotKey = (hour: number) => {
-    const dateStr = formatJstDateKey(currentDate);
+    const dateStr = formatDateKey(currentDate);
     return `${dateStr}-${hour}`;
   };
 
@@ -62,8 +62,8 @@ export function DayView({ currentDate, selectedSlots, onSlotToggle, organizerSlo
                 <div className="border-r border-b border-gray-200 px-4 py-3 text-sm text-gray-500 text-right">{formatTime(hour)}</div>
                 <div
                   className={`border-r border-b border-gray-200 h-16 transition-colors select-none ${!isOrganizerSelected
-                      ? 'bg-gray-100 cursor-not-allowed'
-                      : isSelected ? 'bg-orange-100 hover:bg-orange-200 cursor-pointer' : 'hover:bg-gray-50 cursor-pointer'
+                    ? 'bg-gray-100 cursor-not-allowed'
+                    : isSelected ? 'bg-orange-100 hover:bg-orange-200 cursor-pointer' : 'hover:bg-gray-50 cursor-pointer'
                     }`}
                   onMouseDown={() => handleMouseDown(slotKey)}
                   onMouseEnter={() => handleMouseEnter(slotKey)}

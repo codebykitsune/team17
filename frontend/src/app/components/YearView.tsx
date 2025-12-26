@@ -1,4 +1,4 @@
-import { formatJstDateKey } from '../lib/dateUtils';
+import { formatDateKey } from '../lib/dateUtils';
 
 interface YearViewProps {
   currentYear: Date;
@@ -17,26 +17,26 @@ export function YearView({ currentYear, selectedSlots, onMonthClick }: YearViewP
   const getDaysInMonth = (monthIndex: number) => {
     const firstDay = new Date(year, monthIndex, 1);
     const lastDay = new Date(year, monthIndex + 1, 0);
-    
+
     const days: (Date | null)[] = [];
-    
+
     // Add empty cells for days before the first day of the month
     const firstDayOfWeek = firstDay.getDay();
     const startOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
     for (let i = 0; i < startOffset; i++) {
       days.push(null);
     }
-    
+
     // Add all days of the month
     for (let i = 1; i <= lastDay.getDate(); i++) {
       days.push(new Date(year, monthIndex, i));
     }
-    
+
     return days;
   };
 
   const hasAvailability = (date: Date) => {
-    const dateStr = formatJstDateKey(date);
+    const dateStr = formatDateKey(date);
     for (let hour = 0; hour < 24; hour++) {
       if (selectedSlots.has(`${dateStr}-${hour}`)) {
         return true;
@@ -103,13 +103,12 @@ export function YearView({ currentYear, selectedSlots, onMonthClick }: YearViewP
                     return (
                       <div
                         key={idx}
-                        className={`aspect-square flex items-center justify-center text-xs rounded ${
-                          isToday
-                            ? 'bg-orange-600 text-white'
-                            : hasSlots
+                        className={`aspect-square flex items-center justify-center text-xs rounded ${isToday
+                          ? 'bg-orange-600 text-white'
+                          : hasSlots
                             ? 'bg-orange-100 text-orange-900'
                             : 'text-gray-700 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         {day.getDate()}
                       </div>

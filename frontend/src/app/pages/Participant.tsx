@@ -7,7 +7,7 @@ import { LocationData, LocationSearch } from "../components/LocationSearch";
 import { MonthView } from "../components/MonthView";
 import { WeekView } from "../components/WeekView";
 import { YearView } from "../components/YearView";
-import { formatJstDateKey, getJstHour, toJstISOString } from "../lib/dateUtils";
+import { formatDateKey, getHour, toISOString } from "../lib/dateUtils";
 import { supabase } from "../lib/supabaseClient";
 
 export default function Participant() {
@@ -110,9 +110,11 @@ export default function Participant() {
         if (schedError) throw schedError;
 
         const slotKeys = scheduleData.map((s) => {
-          const d = new Date(s.date);
-          const dateStr = formatJstDateKey(d);
-          const hour = getJstHour(d);
+          // Ensure the string is treated as UTC if it doesn't have timezone info
+          const dateStrIso = s.date.endsWith("Z") || s.date.includes("+") ? s.date : `${s.date}Z`;
+          const d = new Date(dateStrIso);
+          const dateStr = formatDateKey(d);
+          const hour = getHour(d);
           return `${dateStr}-${hour}`;
         });
         setOrganizerSlots(new Set(slotKeys));
@@ -161,7 +163,7 @@ export default function Participant() {
 
         return {
           user_id: userData.id,
-          date: toJstISOString(date)
+          date: toISOString(date)
         };
       });
 

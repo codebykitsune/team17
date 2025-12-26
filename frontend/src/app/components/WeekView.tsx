@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { formatJstDateKey } from '../lib/dateUtils';
+import { formatDateKey } from '../lib/dateUtils';
 
 interface WeekViewProps {
   currentWeek: Date;
@@ -26,7 +26,7 @@ export function WeekView({ currentWeek, selectedSlots, onSlotToggle, organizerSl
   const getDayName = (date: Date) => date.toLocaleDateString('en-US', { weekday: 'short' });
   const getDayDate = (date: Date) => date.getDate();
   const getSlotKey = (date: Date, hour: number) => {
-    const dateStr = formatJstDateKey(date);
+    const dateStr = formatDateKey(date);
     return `${dateStr}-${hour}`;
   };
 
@@ -89,10 +89,10 @@ export function WeekView({ currentWeek, selectedSlots, onSlotToggle, organizerSl
                   <div
                     key={slotKey}
                     className={`border-r border-b border-gray-200 last:border-r-0 h-12 transition-colors select-none ${!isOrganizerSelected
-                        ? 'bg-gray-100 cursor-not-allowed' // 参加者画面用のグレーアウト
-                        : isSelected
-                          ? 'bg-orange-100 hover:bg-orange-200 cursor-pointer'
-                          : 'hover:bg-gray-50 cursor-pointer'
+                      ? 'bg-gray-100 cursor-not-allowed' // 参加者画面用のグレーアウト
+                      : isSelected
+                        ? 'bg-orange-100 hover:bg-orange-200 cursor-pointer'
+                        : 'hover:bg-gray-50 cursor-pointer'
                       }`}
                     onMouseDown={() => handleMouseDown(slotKey)}
                     onMouseEnter={() => handleMouseEnter(slotKey)}

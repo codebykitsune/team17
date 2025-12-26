@@ -18,7 +18,7 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { supabase } from "../lib/supabaseClient";
-import { formatJstDateKey, toJstISOString } from "../lib/dateUtils";
+import { formatDateKey, toISOString } from "../lib/dateUtils";
 
 export default function App() {
   const navigate = useNavigate();
@@ -45,13 +45,13 @@ export default function App() {
 
   const organizerSlots = useMemo(() => {
     const slots = new Set<string>();
-    const nowJst = new Date(toJstISOString(new Date()));
+    const now = new Date();
 
     const addDaySlots = (date: Date) => {
-      const dateStr = formatJstDateKey(date);
+      const dateStr = formatDateKey(date);
       for (let hour = 0; hour < 24; hour++) {
-        const slotDate = new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00+09:00`);
-        if (slotDate.getTime() >= nowJst.getTime()) {
+        const slotDate = new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00`);
+        if (slotDate.getTime() >= now.getTime()) {
           slots.add(`${dateStr}-${hour}`);
         }
       }
@@ -91,7 +91,7 @@ export default function App() {
 
         return {
           user_id: userId,
-          date: toJstISOString(date)
+          date: toISOString(date) // Save as UTC
         };
       });
 

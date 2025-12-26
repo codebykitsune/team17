@@ -1,4 +1,4 @@
-import { formatJstDateKey } from '../lib/dateUtils';
+import { formatDateKey } from '../lib/dateUtils';
 
 interface MonthViewProps {
   currentMonth: Date;
@@ -13,26 +13,26 @@ export function MonthView({ currentMonth, selectedSlots, onDateClick }: MonthVie
     const month = currentMonth.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    
+
     const days: (Date | null)[] = [];
-    
+
     // Add empty cells for days before the first day of the month
     const firstDayOfWeek = firstDay.getDay();
     const startOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1; // Monday as first day
     for (let i = 0; i < startOffset; i++) {
       days.push(null);
     }
-    
+
     // Add all days of the month
     for (let i = 1; i <= lastDay.getDate(); i++) {
       days.push(new Date(year, month, i));
     }
-    
+
     return days;
   };
 
   const hasAvailability = (date: Date) => {
-    const dateStr = formatJstDateKey(date);
+    const dateStr = formatDateKey(date);
     for (let hour = 0; hour < 24; hour++) {
       if (selectedSlots.has(`${dateStr}-${hour}`)) {
         return true;
@@ -42,7 +42,7 @@ export function MonthView({ currentMonth, selectedSlots, onDateClick }: MonthVie
   };
 
   const getAvailabilityCount = (date: Date) => {
-    const dateStr = formatJstDateKey(date);
+    const dateStr = formatDateKey(date);
     let count = 0;
     for (let hour = 0; hour < 24; hour++) {
       if (selectedSlots.has(`${dateStr}-${hour}`)) {
@@ -90,15 +90,14 @@ export function MonthView({ currentMonth, selectedSlots, onDateClick }: MonthVie
               >
                 <div className="flex flex-col h-full">
                   <div
-                    className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-sm mb-2 ${
-                      isToday
-                        ? 'bg-orange-600 text-white'
-                        : 'text-gray-900'
-                    }`}
+                    className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-sm mb-2 ${isToday
+                      ? 'bg-orange-600 text-white'
+                      : 'text-gray-900'
+                      }`}
                   >
                     {day.getDate()}
                   </div>
-                  
+
                   {hasSlots && (
                     <div className="flex-1 flex flex-col gap-1">
                       <div className="bg-orange-100 border-l-4 border-orange-600 px-2 py-1 text-xs text-orange-900 rounded-sm">
