@@ -34,6 +34,7 @@ export function useLocationSearch(onSelect: (location: LocationData) => void, de
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [detectedAddress, setDetectedAddress] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     // Debounce logic
     useEffect(() => {
@@ -66,33 +67,7 @@ export function useLocationSearch(onSelect: (location: LocationData) => void, de
         let namePart = result.display_name.split(',')[0];
         namePart = namePart.split(';')[0]; // "新宿駅;3番出口" -> "新宿駅"
 
-        // 名前がregionと完全に一致する場合は、重複表示を避けるためにnamePartを空にするか調整
-        // しかし、ユーザーの要望は「建物名、都道府県」なので、必ず分けたほうが扱いやすい
-
         return { name: namePart, region };
-    };
-
-    const searchLocation = async (q: string) => {
-        setIsLoading(true);
-        try {
-            const params = new URLSearchParams({
-                q: q,
-                format: 'json',
-                addressdetails: '1',
-                limit: '5',
-                countrycodes: 'jp'
-            });
-            // accept-language header for ensure Japanese
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
-                headers: { 'Accept-Language': 'ja' }
-            });
-            const data = await res.json();
-            setResults(data);
-        } catch (error) {
-            console.error("Search failed", error);
-        } finally {
-            setIsLoading(false);
-        }
     };
 
     const fetchNearestStation = async (lat: number, lon: number): Promise<{ name: string, lat: number, lng: number } | null> => {
@@ -114,10 +89,45 @@ export function useLocationSearch(onSelect: (location: LocationData) => void, de
         return null;
     };
 
+    const searchLocation = async (q: string) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            // ... keys ...
+            const params = new URLSearchParams({
+                q: q,
+                format: 'json',
+                addressdetails: '1',
+                limit: '5',
+                countrycodes: 'jp'
+            });
+            // accept-language header for ensure Japanese
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+                headers: { 'Accept-Language': 'ja' }
+            });
+            const data = await res.json();
+            setResults(data);
+            if (data.length === 0) {
+                setError("検索結果が見つかりませんでした");
+            }
+        } catch (error) {
+            console.error("Search failed", error);
+            setError("検索に失敗しました");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // ... fetchNearestStation ...
+
     const reverseGeocode = async (lat: number, lon: number) => {
         setIsLoading(true);
+        setError(null);
         try {
-            // 1. Try HeartRails first (Best for Japanese stations)
+            // 1. Try HeartRails first
+            // ...
+            // (Keep existing logic but replace alerts)
+
             const stationData = await fetchNearestStation(lat, lon);
             let name = "";
             let targetLat = lat;
@@ -125,19 +135,18 @@ export function useLocationSearch(onSelect: (location: LocationData) => void, de
 
             if (stationData) {
                 name = stationData.name;
-                // HeartRails returns just the name e.g. "新宿". Append "駅" if likely a station.
                 if (!name.endsWith('駅')) {
                     name = `${name}駅`;
                 }
-                // Use station coordinates instead of browser GPS
                 targetLat = stationData.lat;
                 targetLng = stationData.lng;
             } else {
-                // 2. Fallback to Nominatim if no station found
+                // 2. Fallback to Nominatim
                 const params = new URLSearchParams({
                     lat: lat.toString(),
                     lon: lon.toString(),
                     format: 'json',
+                    addressdetails: '1' // Ensure we get address details
                 });
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`, {
                     headers: { 'Accept-Language': 'ja' }
@@ -145,11 +154,6 @@ export function useLocationSearch(onSelect: (location: LocationData) => void, de
                 const data = await res.json();
 
                 if (data) {
-                    // Use formatted address for detection result too?
-                    // For reverse geocoding, data.display_name is usually "Building, Road..."
-                    // data.address is available if addressdetails=1 (default for reverse mostly? need check)
-                    // Let's assume we can use formatAddress pattern if address is present.
-
                     if (data.address) {
                         const tempResult: NominatimResult = {
                             display_name: data.display_name,
@@ -158,7 +162,6 @@ export function useLocationSearch(onSelect: (location: LocationData) => void, de
                             address: data.address
                         };
                         const formatted = formatAddress(tempResult);
-                        // 逆ジオコーディングの場合は、inputには "建物名 (地域名)" のように入れておくと親切かも
                         name = formatted.region ? `${formatted.name} ${formatted.region}` : formatted.name;
                     } else if (data.display_name) {
                         name = data.display_name.split(',')[0];
@@ -175,19 +178,20 @@ export function useLocationSearch(onSelect: (location: LocationData) => void, de
                     lng: targetLng
                 });
             } else {
-                alert("場所を特定できませんでした");
+                setError("場所を特定できませんでした");
             }
         } catch (error) {
             console.error("Reverse geocode failed", error);
-            alert("場所の特定に失敗しました");
+            setError("場所の特定に失敗しました");
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleGetCurrentLocation = () => {
+        setError(null);
         if (!navigator.geolocation) {
-            alert("お使いのブラウザは位置情報をサポートしていません");
+            setError("お使いのブラウザは位置情報をサポートしていません");
             return;
         }
 
@@ -199,18 +203,30 @@ export function useLocationSearch(onSelect: (location: LocationData) => void, de
             (error) => {
                 console.error("Geolocation error", error);
                 setIsLoading(false);
-                alert("位置情報の取得に失敗しました。権限を確認してください。");
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        setError("位置情報の利用が許可されていません。ブラウザの設定をご確認ください。");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        setError("位置情報を取得できませんでした。");
+                        break;
+                    case error.TIMEOUT:
+                        setError("位置情報の取得がタイムアウトしました。");
+                        break;
+                    default:
+                        setError("位置情報の取得に失敗しました。");
+                }
             }
         );
     };
 
     const handleSelect = (result: NominatimResult) => {
+        setError(null);
         const formatted = formatAddress(result);
-        // Inputにはシンプルに建物名（または +地域名）を入れる
         const displayName = formatted.region ? `${formatted.name} ${formatted.region}` : formatted.name;
 
         setQuery(displayName);
-        setDetectedAddress(null); // Clear manual detection if picking from list
+        setDetectedAddress(null);
         setIsOpen(false);
         onSelect({
             name: displayName,
@@ -228,8 +244,9 @@ export function useLocationSearch(onSelect: (location: LocationData) => void, de
         setIsOpen,
         detectedAddress,
         setDetectedAddress,
+        error, // Expose error
         handleGetCurrentLocation,
         handleSelect,
-        formatAddress // Expose it for UI list
+        formatAddress
     };
 }

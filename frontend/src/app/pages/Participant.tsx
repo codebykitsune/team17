@@ -1,4 +1,6 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Info } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom"; // useNavigate を追加
 import { AvailabilitySummary } from "../components/AvailabilitySummary";
 import { CalendarHeader, ViewType } from "../components/CalendarHeader";
@@ -9,6 +11,16 @@ import { WeekView } from "../components/WeekView";
 import { YearView } from "../components/YearView";
 import { formatDateKey, getHour, toISOString } from "../lib/dateUtils";
 import { supabase } from "../lib/supabaseClient";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 
 export default function Participant() {
   const navigate = useNavigate(); // 初期化
@@ -28,8 +40,11 @@ export default function Participant() {
   const [organizerSlots, setOrganizerSlots] = useState<Set<string>>(new Set());
   const [eventName, setEventName] = useState("");
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [participantName, setParticipantName] = useState("");
+
   const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -127,10 +142,7 @@ export default function Participant() {
 
   // ★ 追加：参加者の保存処理
   const handleSaveParticipantSchedules = async (name: string) => {
-    if (selectedSlots.size === 0) {
-      alert("日程を1つ以上選択してください");
-      return;
-    }
+    // 0件チェックは削除（確認ダイアログで確認済みのため）
 
     const safeName = name.trim() || "参加者";
 
@@ -154,37 +166,39 @@ export default function Participant() {
 
       if (userError) throw userError;
 
-      // 2. schedules テーブルに保存
-      const schedulesToInsert = Array.from(selectedSlots).map((slotKey) => {
-        const parts = slotKey.split("-");
-        const hour = Number(parts.pop());
-        const dateStr = parts.join("-");
-        const date = new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00`);
+      // 2. schedules テーブルに保存 (選択がある場合のみ)
+      if (selectedSlots.size > 0) {
+        const schedulesToInsert = Array.from(selectedSlots).map((slotKey) => {
+          const parts = slotKey.split("-");
+          const hour = Number(parts.pop());
+          const dateStr = parts.join("-");
+          const date = new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00`);
 
-        return {
-          user_id: userData.id,
-          date: toISOString(date)
-        };
-      });
+          return {
+            user_id: userData.id,
+            date: toISOString(date)
+          };
+        });
 
-      const { error: schedError } = await supabase.from("schedules").insert(schedulesToInsert);
+        const { error: schedError } = await supabase.from("schedules").insert(schedulesToInsert);
+        if (schedError) throw schedError;
+      }
 
-      if (schedError) throw schedError;
-
-      alert("回答を保存しました！集計画面へ移動します。");
+      toast.success("回答を保存しました！集計画面へ移動します。");
       setIsNameModalOpen(false);
       navigate(`/result?eventId=${eventId}`);
     } catch (error: any) {
       console.error("Error saving schedules:", error);
-      alert(`保存に失敗しました: ${error.message}`);
+      toast.error(`保存に失敗しました: ${error.message}`);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleOpenNameModal = () => {
+    setErrorMessage(null);
     if (selectedSlots.size === 0) {
-      alert("日程を1つ以上選択してください");
+      setIsConfirmOpen(true); // エラーの代わりに確認ダイアログを表示
       return;
     }
     setIsNameModalOpen(true);
@@ -197,6 +211,7 @@ export default function Participant() {
 
   const handleSlotToggle = (slotKey: string) => {
     if (!organizerSlots.has(slotKey)) return;
+    setErrorMessage(null); // Clear error on interaction
     setSelectedSlots((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(slotKey)) newSet.delete(slotKey);
@@ -258,7 +273,6 @@ export default function Participant() {
         onViewChange={handleViewChange}
         headerAction={
           <div className="flex items-center gap-4">
-            <p className="text-sm text-gray-500">幹事の候補日からあなたの都合を選んでください</p>
             <button
               onClick={handleOpenNameModal}
               className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-md font-medium transition-colors shadow-sm"
@@ -269,9 +283,15 @@ export default function Participant() {
         }
       />
 
-      <div className="flex flex-1 overflow-hidden">
-        {renderCalendarView()}
-        <AvailabilitySummary selectedSlots={selectedSlots} />
+      <div className="flex flex-1 overflow-hidden flex-col">
+        <div className="bg-orange-50 border-b border-orange-200 px-6 py-2 text-orange-800 text-sm flex items-center gap-2">
+          <Info className="w-4 h-4 text-orange-600" />
+          <span className="font-medium">幹事の候補日からあなたの都合を選んでください</span>
+        </div>
+        <div className="flex flex-1 overflow-hidden">
+          {renderCalendarView()}
+          <AvailabilitySummary selectedSlots={selectedSlots} errorMessage={errorMessage} />
+        </div>
       </div>
 
       {isNameModalOpen && (
@@ -318,6 +338,30 @@ export default function Participant() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>参加可能な日程がありません</AlertDialogTitle>
+            <AlertDialogDescription>
+              候補日の中に参加できる日程が一つも選択されていません。
+              「参加不可」として回答を保存してもよろしいですか？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setIsConfirmOpen(false);
+                setIsNameModalOpen(true);
+              }}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              はい（回答へ進む）
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

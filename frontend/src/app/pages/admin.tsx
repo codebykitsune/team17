@@ -1,5 +1,6 @@
-import { CopyIcon } from "lucide-react";
+import { CopyIcon, Info } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom"; // useLocation を追加
 import { AvailabilitySummary } from "../components/AvailabilitySummary";
 import { CalendarHeader, ViewType } from "../components/CalendarHeader";
@@ -41,7 +42,9 @@ export default function App() {
   const [eventName, setEventName] = useState(eventNameFromState || "");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+
   const [isCopied, setIsCopied] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const organizerSlots = useMemo(() => {
     const slots = new Set<string>();
@@ -71,14 +74,15 @@ export default function App() {
   }, [currentView, currentDate]);
 
   const handleSaveSchedules = async () => {
+    setErrorMessage(null); // Reset error
     if (selectedSlots.size === 0) {
-      alert("日程を選択してください");
+      setErrorMessage("日程を選択してください");
       return;
     }
 
     // ここで userId の存在を確認
     if (!userId) {
-      alert("ユーザーIDが見つかりません。イベント作成からやり直してください。");
+      toast.error("ユーザーIDが見つかりません。イベント作成からやり直してください。");
       return;
     }
 
@@ -105,7 +109,7 @@ export default function App() {
       setIsShareModalOpen(true);
     } catch (error: any) {
       console.error("Error saving schedules:", error);
-      alert(`保存に失敗しました: ${error.message}`);
+      toast.error(`保存に失敗しました: ${error.message}`);
     }
   };
 
@@ -151,6 +155,7 @@ export default function App() {
   const handleViewChange = (view: ViewType) => setCurrentView(view);
 
   const handleSlotToggle = (slotKey: string) => {
+    setErrorMessage(null); // Clear error on interaction
     setSelectedSlots((prev) => {
       const next = new Set(prev);
       if (next.has(slotKey)) next.delete(slotKey);
@@ -167,7 +172,7 @@ export default function App() {
       window.setTimeout(() => setIsCopied(false), 1500);
     } catch (error) {
       console.error("Error copying URL:", error);
-      alert("URLのコピーに失敗しました");
+      toast.error("URLのコピーに失敗しました");
     }
   };
 
@@ -230,7 +235,6 @@ export default function App() {
         onViewChange={handleViewChange}
         headerAction={
           <div className="flex items-center gap-4">
-            <p className="text-sm text-gray-500">候補日を選択して保存してください</p>
             <Button onClick={handleSaveSchedules} className="bg-orange-600 hover:bg-orange-700 text-white">
               日程を確定して保存
             </Button>
@@ -238,9 +242,15 @@ export default function App() {
         }
       />
 
-      <div className="flex flex-1 overflow-hidden">
-        {renderCalendarView()}
-        <AvailabilitySummary selectedSlots={selectedSlots} />
+      <div className="flex flex-1 overflow-hidden flex-col">
+        <div className="bg-orange-50 border-b border-orange-200 px-6 py-2 text-orange-800 text-sm flex items-center gap-2">
+          <Info className="w-4 h-4 text-orange-600" />
+          <span className="font-medium">カレンダーをドラッグして、候補日時の範囲を選択してください</span>
+        </div>
+        <div className="flex flex-1 overflow-hidden">
+          {renderCalendarView()}
+          <AvailabilitySummary selectedSlots={selectedSlots} errorMessage={errorMessage} />
+        </div>
       </div>
 
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>

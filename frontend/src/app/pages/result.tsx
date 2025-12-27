@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 import AnswersView from "../components/AnswersView";
 import { FinalResultView } from "../components/FinalResultView";
@@ -26,6 +27,7 @@ export default function Result() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [eventData, setEventData] = useState<EventData | null>(null);
   const [isFinalizing, setIsFinalizing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResultData = async () => {
@@ -108,8 +110,11 @@ export default function Result() {
             };
           })
         );
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching data:", err);
+        const msg = err.message || "データの取得に失敗しました";
+        setErrorMessage(msg);
+        toast.error(msg);
       }
     };
 
@@ -128,11 +133,27 @@ export default function Result() {
 
       window.location.reload();
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to finalize event:", err);
+      toast.error(`イベントの確定に失敗しました: ${err.message}`);
       setIsFinalizing(false);
     }
   };
+
+  if (errorMessage) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-10 bg-gray-50">
+        <h1 className="text-xl font-bold text-red-600 mb-4">エラーが発生しました</h1>
+        <p className="text-gray-700 mb-6">{errorMessage}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-orange-600 text-white px-6 py-2 rounded-md hover:bg-orange-700 transition"
+        >
+          再読み込み
+        </button>
+      </div>
+    );
+  }
 
   if (!eventData) return <div className="p-10 text-center">読み込み中...</div>;
 
@@ -143,7 +164,7 @@ export default function Result() {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
-            <img src="/meetAndEat_circle.png" alt="Meet and Eat Circle Icon" className="w-8 h-8" />
+              <img src="/meetAndEat_circle.png" alt="Meet and Eat Circle Icon" className="w-8 h-8" />
             </div>
             <div>
               <h1 className="text-xl text-gray-900">ミートアンドイート</h1>

@@ -2,7 +2,8 @@ import { useRef, useEffect } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Loader2, MapPin, Search, Navigation } from 'lucide-react';
+import { Loader2, MapPin, Search, Navigation, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useLocationSearch, NominatimResult } from '../hooks/useLocationSearch';
 
 export interface LocationData {
@@ -29,7 +30,8 @@ export function LocationSearch({ onSelect, placeholder = "駅名を検索...", d
         setDetectedAddress,
         handleGetCurrentLocation,
         handleSelect,
-        formatAddress
+        formatAddress,
+        error
     } = useLocationSearch(onSelect, defaultValue);
 
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -79,6 +81,16 @@ export function LocationSearch({ onSelect, placeholder = "駅名を検索...", d
                         )}
                     </div>
 
+                    {error && (
+                        <Alert variant="destructive" className="mt-4 bg-red-50 border-red-200 text-red-600">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>検索結果なし</AlertTitle>
+                            <AlertDescription>
+                                {error}
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
                     {isOpen && results.length > 0 && (
                         <ul className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                             {results.map((result: NominatimResult, index) => (
@@ -119,16 +131,29 @@ export function LocationSearch({ onSelect, placeholder = "駅名を検索...", d
                     </Button>
 
                     {detectedAddress && (
-                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md animate-in fade-in slide-in-from-top-2">
-                            <p className="text-xs text-green-800 font-semibold mb-1">取得された位置情報:</p>
-                            <div className="flex items-center gap-2 text-green-700">
-                                <MapPin className="w-4 h-4 shrink-0" />
-                                <span className="font-medium text-sm break-all">{detectedAddress}</span>
-                            </div>
-                            <p className="mt-2 text-xs text-green-600/80">
-                                ※意図しない場所の場合は、検索タブから駅や施設名を指定してください
-                            </p>
-                        </div>
+                        <Alert className="mt-4 border-green-200 bg-green-50/50 text-green-900">
+                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            <AlertTitle className="text-green-800">位置情報を取得しました</AlertTitle>
+                            <AlertDescription className="text-green-700">
+                                <div className="flex items-center gap-1 mt-1 font-medium">
+                                    <MapPin className="h-3.5 w-3.5" />
+                                    {detectedAddress}
+                                </div>
+                                <div className="text-xs text-green-600/80 mt-1">
+                                    ※意図しない場所の場合は、検索タブから駅や施設名を指定してください
+                                </div>
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                    {error && (
+                        <Alert variant="destructive" className="mt-4 bg-red-50 border-red-200 text-red-600">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>取得エラー</AlertTitle>
+                            <AlertDescription>
+                                {error}
+                            </AlertDescription>
+                        </Alert>
                     )}
                 </TabsContent>
             </Tabs>

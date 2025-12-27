@@ -1,10 +1,12 @@
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { LocationSearch, LocationData } from './LocationSearch';
 
 export function HeroSection() {
@@ -12,11 +14,14 @@ export function HeroSection() {
   const [organizerName, setOrganizerName] = useState("");
   const [participants, setParticipants] = useState(2);
   const [location, setLocation] = useState<LocationData | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleCreateEvent = async () => {
+    setError(null); // Reset error
     if (!eventName.trim() || !organizerName.trim()) {
-      alert("名前とイベント名を入力してください");
+      setError("名前とイベント名を入力してください");
+      toast.error("名前とイベント名を入力してください");
       return;
     }
 
@@ -54,7 +59,7 @@ export function HeroSection() {
 
       if (userError) throw userError;
 
-      alert("イベントを作成しました！");
+      toast.success("イベントを作成しました！");
 
       // 3. 次のページへ遷移（state に ID を持たせる）
       navigate(`/admin?hash=${eventData.hash}`, {
@@ -66,7 +71,7 @@ export function HeroSection() {
       });
     } catch (error: any) {
       console.error("Error creating event:", error);
-      alert(`作成に失敗しました: ${error.message}`);
+      toast.error(`作成に失敗しました: ${error.message}`);
     }
   };
 
@@ -106,7 +111,10 @@ export function HeroSection() {
                   type="text"
                   placeholder="例：山田太郎"
                   value={organizerName}
-                  onChange={(e) => setOrganizerName(e.target.value)}
+                  onChange={(e) => {
+                    setOrganizerName(e.target.value);
+                    if (error) setError(null);
+                  }}
                   className="w-full h-12"
                 />
               </div>
@@ -128,7 +136,10 @@ export function HeroSection() {
                   type="text"
                   placeholder="例：チーム忘年会"
                   value={eventName}
-                  onChange={(e) => setEventName(e.target.value)}
+                  onChange={(e) => {
+                    setEventName(e.target.value);
+                    if (error) setError(null);
+                  }}
                   className="w-full h-12"
                 />
               </div>
@@ -148,6 +159,16 @@ export function HeroSection() {
                   </Button>
                 </div>
               </div>
+
+              {error && (
+                <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-600">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>入力エラー</AlertTitle>
+                  <AlertDescription>
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
 
               <Button
                 onClick={handleCreateEvent}

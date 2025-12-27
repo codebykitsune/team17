@@ -1,18 +1,22 @@
-import { Clock } from 'lucide-react';
+import { Clock, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 interface AvailabilitySummaryProps {
   selectedSlots: Set<string>;
+  errorMessage?: string | null;
 }
 
-export function AvailabilitySummary({ selectedSlots }: AvailabilitySummaryProps) {
+export function AvailabilitySummary({ selectedSlots, errorMessage }: AvailabilitySummaryProps) {
+  // ... (groupSlotsByDate function) ...
   const groupSlotsByDate = () => {
+    // ... (same implementation)
     const grouped: { [key: string]: number[] } = {};
-    
+
     selectedSlots.forEach((slotKey) => {
       const parts = slotKey.split('-');
       const hour = Number(parts[parts.length - 1]);
       const dateStr = parts.slice(0, -1).join('-');
-      
+
       if (!grouped[dateStr]) {
         grouped[dateStr] = [];
       }
@@ -28,8 +32,9 @@ export function AvailabilitySummary({ selectedSlots }: AvailabilitySummaryProps)
   };
 
   const formatTimeRange = (hours: number[]) => {
+    // ... (same implementation)
     if (hours.length === 0) return '';
-    
+
     const ranges: string[] = [];
     let start = hours[0];
     let end = hours[0];
@@ -67,11 +72,19 @@ export function AvailabilitySummary({ selectedSlots }: AvailabilitySummaryProps)
 
   if (!hasSelection) {
     return (
-      <div className="bg-white border-l border-gray-200 p-6 w-80">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="bg-white border-l border-gray-200 p-6 w-80 flex flex-col gap-4">
+        <div className="flex items-center gap-2 mb-2">
           <Clock className="w-5 h-5 text-gray-500" />
           <h3 className="text-gray-900">Your Availability</h3>
         </div>
+
+        {errorMessage && (
+          <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-600">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+
         <p className="text-sm text-gray-500">
           Click and drag on the calendar to select your available time slots.
         </p>
@@ -80,12 +93,20 @@ export function AvailabilitySummary({ selectedSlots }: AvailabilitySummaryProps)
   }
 
   return (
-    <div className="bg-white border-l border-gray-200 p-6 w-80 overflow-auto">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="bg-white border-l border-gray-200 p-6 w-80 overflow-auto flex flex-col gap-4">
+      <div className="flex items-center gap-2 mb-2">
         <Clock className="w-5 h-5 text-orange-600" />
         <h3 className="text-gray-900">Your Availability</h3>
       </div>
-      
+
+      {errorMessage && (
+        <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-600">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>要確認</AlertTitle>
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-3 max-h-[calc(100vh-250px)] overflow-auto">
         {Object.entries(groupedSlots)
           .sort(([a], [b]) => a.localeCompare(b))
